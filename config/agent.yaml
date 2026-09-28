@@ -1,0 +1,41 @@
+# Agent Manifest — AgentRegistry entry point
+# This file is required for AgentRegistry auto-discovery (lazy-load architecture).
+#
+# Every key below is read at the ROOT level by AgentRegistry.discover(); nesting
+# them under an `agent:` block makes them invisible to the loader (namespace and
+# enabled silently fall back to defaults and the registry key degrades to the
+# collision-prone `default/unknown@latest`). `class` is a SINGLE dotted path —
+# the registry does `manifest["class"].rsplit(".", 1)`, so a `module` + `class`
+# split raises KeyError at compile time (AgentUnavailableError -> HTTP 503).
+# See the AgentRegistry manifest contract.
+
+name: "SDSRevisionEvidenceAgent"
+namespace: "mfg"
+version: "1.0.0"
+enabled: true
+class: "src.graph.graph.SdsRevisionEvidenceGraph"
+
+# Classification metadata (cross-checked against README.md by the category gate)
+id: "MFG-C2-123"
+category: "Cat 2"
+# Static generation contract. Omitted by legacy templates defaults to deterministic.
+# This AG drives its LLM stage through the config["llm"] injection seam (BaseLLM), so the
+# truthful declaration is llm — omitting it would record an LLM template as deterministic.
+generation_mode: "llm"  # deterministic | llm
+industry: "MFG"
+
+# L1 base class the agent graph inherits directly
+base_type: "AgentBaseGraph"
+
+# Security
+required_trust_level: "VERIFIED_EXTERNAL"
+
+# Dependencies. `secrets` lists only the keys required at STARTUP — the LLM is
+# injected through the config["llm"] seam and is not resolved at compile time.
+requires:
+  extras: []
+  secrets: []
+
+# NOTE: runtime-tunable parameters (max_retry / timeout_s / top_k / temperature /
+# memory_enabled / hitl.*) live in config/config.yaml, NOT in this static manifest
+# (the agent.yaml vs config.yaml split).

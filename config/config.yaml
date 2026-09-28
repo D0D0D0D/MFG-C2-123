@@ -1,0 +1,26 @@
+# Runtime parameters — MFG-C2-123 SDSRevisionEvidenceAgent
+# Static identity / entry point / requires live in config/agent.yaml.
+# This file carries every runtime-tunable value (manifest vs runtime split).
+
+max_retry: 3
+timeout_s: 30
+
+# Retrieval (Stage 2) — SDS は多節・長文のため既定より大きめ
+top_k: 8
+
+# LLM (Stage 3) — 製品安全文書のため決定論寄り。
+# 具体クライアントはテンプレートに書かず config["llm"] で BaseLLM 実装を注入する。
+temperature: 0.0
+
+# LLM は未配線（注入シームのみ）。STG は deterministic fallback で通す。
+# null のとき Stage 3 は決定論フォールバックを返し、degradation_reason に
+# "llm_unavailable" を立てたうえで status="success" を維持する（縮退は正常系）。
+# 実 LLM の配線・出力品質検証はリリース前提条件として留保する。
+llm: null
+
+# Checkpointer / HITL
+# MFG は HITL Gate 対象業種外（docs/01_proposal.md の HITL Gate 表と一致）。
+# hitl.enabled: false のため memory_enabled も false（checkpointer 不要）。
+memory_enabled: false
+hitl:
+  enabled: false
